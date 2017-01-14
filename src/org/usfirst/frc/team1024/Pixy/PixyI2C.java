@@ -1,4 +1,9 @@
 package org.usfirst.frc.team1024.Pixy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.I2C.Port;
 /**
@@ -8,99 +13,51 @@ import edu.wpi.first.wpilibj.I2C.Port;
  */
 //Warning: if the pixy is plugged in through mini usb, this code WILL NOT WORK b/c the pixy is smart and detects where it should send data
 public class PixyI2C{
-	PixyPacket values;
+	
+	final int BYTES_TO_READ = 128;
+	final int SYNCWORD = 0xaa55;
+	
 	I2C pixy;
-	Port port = Port.kOnboard;
-	PixyPacket[] packets;
-	PixyException pExc;
-	String print;
+	Port port = Port.kOnboard; //
 	public PixyI2C() {
-		pixy = new I2C(port, 0x54);
-		packets = new PixyPacket[7];
-		pExc = new PixyException(print);
-		values = new PixyPacket();
+		pixy = new I2C(port, 0x54); //this initializes the I2C interface to accept data
 	}
+	
 	//This method parses raw data from the pixy into readable integers
-	public int cvt(byte upper, byte lower) {
+	public int doubleByteToInt(byte upper, byte lower) {
 		return (((int)upper & 0xff) << 8) | ((int)lower & 0xff);
 	}
-	/*
-	public void pixyReset(){
-		pixy.reset();
-	}
-	*/
+
 	//This method gathers data, then parses that data, and assigns the ints to global variables
-	public PixyPacket readPacket(int Signature) throws PixyException { //The signature should be which number object in 
-		int Checksum;												   //pixymon you are trying to get data for
-		int Sig;
-		byte[] rawData = new byte[32];
+	public List<PixyObject> readFrame(int signature) throws PixyException { //The signature should be which number object in 
+
+		ArrayList<PixyObject> pixyObjectList = new ArrayList<PixyObject>();
+		byte[] rawData = new byte[BYTES_TO_READ];
 		try{
-			pixy.readOnly(rawData, 32);
+			pixy.readOnly(rawData, BYTES_TO_READ);
+			DriverStation.reportError("Got some Data", false);
 		} catch (RuntimeException e){
+			throw new PixyException("pixy read failure");
 		}
-		if(rawData.length < 32){
-			System.out.println("byte array length is broken");
-			return null;
+		if(rawData.length < BYTES_TO_READ){
+			DriverStation.reportError("pixy stream to small", false);
+			throw new PixyException("pixy stream to small ???");
 		}
-		for (int i = 0; i <= 16; i++) {
-			int syncWord = cvt(rawData[i+1], rawData[i+0]); //Parse first 2 bytes
-			if (syncWord == 0xaa55) { //Check is first 2 bytes equal a "sync word", which indicates the start of a packet of valid data
-				syncWord = cvt(rawData[i+3], rawData[i+2]); //Parse the next 2 bytes
-				if (syncWord != 0xaa55){ //Shifts everything in the case that one syncword is sent
-					i -= 2;
-				}
-				//This next block parses the rest of the data
-				Checksum = cvt(rawData[i+5], rawData[i+4]);
-				Sig = cvt(rawData[i+7], rawData[i+6]);
-				if(Sig <= 0 || Sig > packets.length){
-					break;
-				}
-				packets[Sig - 1] = new PixyPacket();
-				PixyPacket.X = cvt(rawData[i+9], rawData[i+8]);
-				PixyPacket.Y = cvt(rawData[i+11], rawData[i+10]);
-				PixyPacket.Width = cvt(rawData[i+13], rawData[i+12]);
-				PixyPacket.Height = cvt(rawData[i+15], rawData[i+14]);
-				//Checks whether the data is valid using the checksum *This if block should never be entered*
-				if (Checksum != Sig + packets[Sig - 1].X + packets[Sig - 1].Y + packets[Sig - 1].Width + packets[Sig - 1].Height) {
-					packets[Sig - 1] = null;
-					throw pExc;
-				}
-				break;
+		for (int i = 0; i <= BYTES_TO_READ - 2; i++) {
+			DriverStation.reportError("inside the loop", false);
+			int syncWord = doubleByteToInt(rawData[i+1], rawData[i+0]); //Parse first 2 bytes
+			DriverStation.reportError(String.format("syncword? %1$d %2$d", syncWord, i), false);
+			if (syncWord != SYNCWORD) {
+				continue;
 			}
+			
+			DriverStation.reportError("Got the sync word and pixyObject created", false);
+			PixyObject pixyObject = new PixyObject(Arrays.copyOfRange(rawData,i+2, i+15));
+
+			if(pixyObject.isValid() && pixyObject.signature == signature)
+				pixyObjectList.add(pixyObject);
+			i += 16;
 		}
-		//Assigns our packet to a temp packet, then deletes data so that we dont return old data
-		PixyPacket pkt = packets[Signature - 1];
-		packets[Signature - 1] = null;
-		return pkt;
+		return pixyObjectList;
 	}
-	public int getX(){
-		return PixyPacket.X;
-	}
-	public int getY(){
-		return PixyPacket.Y;
-	}
-	public int getWidth(){
-		return PixyPacket.Width;
-	}
-	public int getHeight(){
-		return PixyPacket.Height;
-	}
-	public int getArea(){
-		return getWidth() * getHeight();
-	}
-	/* vvvvv Experimental Stuff vvvvv
-	int height = 12; //actual target height
-	int width = 24; //actual target width
-	int w = 320 - getX(); //320 is camera x resolution
-	int x = 5;
-	double d = Math.sqrt(41);
-	//gets the horizontal component of the distance
-	public double getDistance(int angle){
-		return width*320/(2*getWidth()*Math.tan(angle));
-	}
-	*/
 }
-
-
-
-

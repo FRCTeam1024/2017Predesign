@@ -1,8 +1,13 @@
 
 package org.usfirst.frc.team1024.robot;
+import java.util.List;
+
 import org.usfirst.frc.team1024.Pixy.*;
 
 import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -123,8 +128,13 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
-		updatePixy();
-		printPixyStuff();
+		List<PixyObject> pixyObjectList = updatePixy();
+		printPixyStuff(pixyObjectList);
+		if (pixyObjectList != null) {
+			for (int i = 0; i < pixyObjectList.size(); i++) {
+				DriverStation.reportError(pixyObjectList.get(i).toString(), false);
+			}
+		}
 		
 		if (oi.logi.getRawButton(7) == true) {
 			drivetrain.drive(-0.5*oi.logi.getRawAxis(1), -0.5*oi.logi.getRawAxis(3));
@@ -168,30 +178,23 @@ public class Robot extends IterativeRobot {
 	 * Please move these methods later
 	 * The way it is now, one would need to first call update pixy, and then call the print method
 	 */
-	public static void updatePixy() {
+	public static List<PixyObject> updatePixy() {
 		//pixy values are saved and read like PixyPacket.(x,y,width,height)
 		try {
-			pixy.readPacket(1);
+			return pixy.readFrame(1);
 		} catch (PixyException | NullPointerException e) {
 			e.printStackTrace();
+			return null;
 		}
 	}
-	public static void printPixyStuff(){
-		SmartDashboard.putNumber("X", PixyPacket.X);
-		SmartDashboard.putNumber("Y", PixyPacket.Y);
-		SmartDashboard.putNumber("Width", PixyPacket.Width);
-		SmartDashboard.putNumber("Height", PixyPacket.Height);
-		SmartDashboard.putNumber("Area", pixy.getArea());
-		SmartDashboard.putNumber("AverageX", getAveragePixyX());
-	}
-	public static int firstAverage = 0;
-	public static int secondAverage = 0;
-	public static int getAveragePixyX(){
-		for(int i = 0; i < pixyValues.length; i++){
-			pixyValues[i] = pixy.getX();
-			firstAverage = pixyValues[i];
-			averageX = (firstAverage + averageX)/2;
+	
+	public static void printPixyStuff(List<PixyObject> pol){
+		for(int i = 0; i < pol.size(); i++) {
+		PixyObject po1 = pol.get(i);
+		SmartDashboard.putNumber(String.format("Pixy %1$d X", i), po1.getX());
+		SmartDashboard.putNumber(String.format("Pixy %1$d Y", i), po1.getY());
+		SmartDashboard.putNumber(String.format("Pixy %1$d Width", i), po1.getWidth());
+		SmartDashboard.putNumber(String.format("Pixy %1$d Height", i), po1.getHeight());
 		}
-		return averageX;
 	}
 }
