@@ -29,7 +29,7 @@ public class Robot extends IterativeRobot {
 
 	public static Drivetrain drivetrain;
 	public static OI oi;
-	public static PixyI2C pixy;
+	public PixyI2C pixy;
 	public PixyPacket test;
 	public DigitalOutput pixyPower;
 	public static int[] pixyValues;
@@ -129,42 +129,13 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
 		List<PixyObject> pixyObjectList = updatePixy();
-		printPixyStuff(pixyObjectList);
 		if (pixyObjectList != null) {
-			for (int i = 0; i < pixyObjectList.size(); i++) {
-				DriverStation.reportError(pixyObjectList.get(i).toString(), false);
-			}
+			printPixyStuff(pixyObjectList);
+			DriverStation.reportWarning("Got " + pixyObjectList.size() + " objects from the pixy", false);
+			//for (int i = 0; i < pixyObjectList.size(); i++) {
+			//	DriverStation.reportError(pixyObjectList.get(i).toString(), false);
+			//}
 		}
-		
-		if (oi.logi.getRawButton(7) == true) {
-			drivetrain.drive(-0.5*oi.logi.getRawAxis(1), -0.5*oi.logi.getRawAxis(3));
-		} else {
-			drivetrain.drive(-oi.logi.getRawAxis(1), -oi.logi.getRawAxis(3));
-		}
-		
-		
-		// 210 center
-		/*if (i < 100) {
-			if (pixy.getX() + 25 >= 190 && pixy.getX() + 25 <= 210) {
-				drivetrain.drive(0.0, 0.0);
-				i++;
-			} else if (pixy.getX() + 25 < 190) {
-				drivetrain.drive(-0.3, 0.3); // 0.3s
-				i--;
-			} else if (pixy.getX() + 25 > 210) {
-				drivetrain.drive(0.3, -0.3); // 0.3s
-				i--;
-			}
-		} else {
-			drivetrain.drive(0.0, 0.0);
-		}*/
-
-		/*
-		if(pixy.getArea() >= 8600){
-			drivetrain.drive(0.0, 0.0);
-		} else if(pixy.getArea() < 7500){
-			drivetrain.drive(0.2, 0.2);
-		}*/
 	}
 
 	/**
@@ -178,12 +149,13 @@ public class Robot extends IterativeRobot {
 	 * Please move these methods later
 	 * The way it is now, one would need to first call update pixy, and then call the print method
 	 */
-	public static List<PixyObject> updatePixy() {
+	public  List<PixyObject> updatePixy() {
 		//pixy values are saved and read like PixyPacket.(x,y,width,height)
 		try {
 			return pixy.readFrame(1);
-		} catch (PixyException | NullPointerException e) {
-			e.printStackTrace();
+		} catch ( Exception e) {
+			DriverStation.reportError(e.getMessage(), true);
+			// e.printStackTrace();
 			return null;
 		}
 	}

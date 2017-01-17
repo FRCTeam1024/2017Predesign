@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.I2C.Port;
 //Warning: if the pixy is plugged in through mini usb, this code WILL NOT WORK b/c the pixy is smart and detects where it should send data
 public class PixyI2C{
 	
-	final int BYTES_TO_READ = 128;
+	final int BYTES_TO_READ = 64;
 	final int SYNCWORD = 0xaa55;
 	
 	I2C pixy;
@@ -24,18 +24,19 @@ public class PixyI2C{
 	}
 	
 	//This method parses raw data from the pixy into readable integers
-	public int doubleByteToInt(byte upper, byte lower) {
+	private int doubleByteToInt(byte upper, byte lower) {
 		return (((int)upper & 0xff) << 8) | ((int)lower & 0xff);
 	}
 
-	//This method gathers data, then parses that data, and assigns the ints to global variables
-	public List<PixyObject> readFrame(int signature) throws PixyException { //The signature should be which number object in 
+	//This method gathers data, then parses that data	
+	public List<PixyObject> readFrame(int signature) throws Exception { //The signature should be which number object in 
 
 		ArrayList<PixyObject> pixyObjectList = new ArrayList<PixyObject>();
 		byte[] rawData = new byte[BYTES_TO_READ];
 		try{
 			pixy.readOnly(rawData, BYTES_TO_READ);
-			DriverStation.reportError("Got some Data", false);
+			RawPixyData rpd = new RawPixyData(rawData);
+			DriverStation.reportError("Raw Data: " + rpd.toString(), false);
 		} catch (RuntimeException e){
 			throw new PixyException("pixy read failure");
 		}
@@ -43,20 +44,26 @@ public class PixyI2C{
 			DriverStation.reportError("pixy stream to small", false);
 			throw new PixyException("pixy stream to small ???");
 		}
-		for (int i = 0; i <= BYTES_TO_READ - 2; i++) {
-			DriverStation.reportError("inside the loop", false);
+		for (int i = 0; i <= BYTES_TO_READ - 15; i++) {
 			int syncWord = doubleByteToInt(rawData[i+1], rawData[i+0]); //Parse first 2 bytes
-			DriverStation.reportError(String.format("syncword? %1$d %2$d", syncWord, i), false);
 			if (syncWord != SYNCWORD) {
 				continue;
 			}
 			
-			DriverStation.reportError("Got the sync word and pixyObject created", false);
-			PixyObject pixyObject = new PixyObject(Arrays.copyOfRange(rawData,i+2, i+15));
+			int secondWord = doubleByteToInt(rawData[i+3], rawData[i+2]); //Parse next 2 bytes
+			int pixyObjectStart = 2;
+			int pixyObjectEnd = 14;
+			if (secondWord == SYNCWORD) {
+				pixyObjectStart += 2;
+				pixyObjectEnd += 2;
+			}
+			PixyObject pixyObject = new PixyObject(Arrays.copyOfRange(rawData, pixyObjectStart, pixyObjectEnd));
+		    DriverStation.reportError("pixyObject created: " + pixyObject, false);
 
 			if(pixyObject.isValid() && pixyObject.signature == signature)
 				pixyObjectList.add(pixyObject);
 			i += 16;
+			
 		}
 		return pixyObjectList;
 	}
