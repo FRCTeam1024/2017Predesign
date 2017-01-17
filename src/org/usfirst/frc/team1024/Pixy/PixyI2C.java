@@ -36,7 +36,7 @@ public class PixyI2C{
 		try{
 			pixy.readOnly(rawData, BYTES_TO_READ);
 			RawPixyData rpd = new RawPixyData(rawData);
-			DriverStation.reportError("Raw Data: " + rpd.toString(), false);
+			DriverStation.reportWarning("Raw Data: " + rpd.toString(), false);
 		} catch (RuntimeException e){
 			throw new PixyException("pixy read failure");
 		}
@@ -45,25 +45,29 @@ public class PixyI2C{
 			throw new PixyException("pixy stream to small ???");
 		}
 		for (int i = 0; i <= BYTES_TO_READ - 15; i++) {
-			int syncWord = doubleByteToInt(rawData[i+1], rawData[i+0]); //Parse first 2 bytes
-			if (syncWord != SYNCWORD) {
-				continue;
+			int firstWord = doubleByteToInt(rawData[i+1], rawData[i+0]); //Parse first 2 bytes
+			DriverStation.reportWarning("first word: " + firstWord + " at i = " + Integer.toString(i), false);
+			if (firstWord == SYNCWORD) {
+				DriverStation.reportWarning("found SyncWord", false);
+				int secondWord = doubleByteToInt(rawData[i+3], rawData[i+2]); //Parse next 2 bytes
+				int pixyObjectStart = 2;
+				int pixyObjectEnd = 14;
+				if (secondWord == SYNCWORD) {
+					pixyObjectStart += 2;
+					pixyObjectEnd += 2;
+				}
+				PixyObject pixyObject = new PixyObject(Arrays.copyOfRange(rawData, pixyObjectStart, pixyObjectEnd));
+			    DriverStation.reportWarning("pixyObject created: " + pixyObject, false);
+	
+				if(pixyObject.isValid() ) {
+					DriverStation.reportWarning("pixyObject is valid", false);
+					if(pixyObject.signature == signature) {
+						DriverStation.reportWarning("pixyObject is the right signature", false);
+						pixyObjectList.add(pixyObject);
+						i += 16;
+					}
+				}
 			}
-			
-			int secondWord = doubleByteToInt(rawData[i+3], rawData[i+2]); //Parse next 2 bytes
-			int pixyObjectStart = 2;
-			int pixyObjectEnd = 14;
-			if (secondWord == SYNCWORD) {
-				pixyObjectStart += 2;
-				pixyObjectEnd += 2;
-			}
-			PixyObject pixyObject = new PixyObject(Arrays.copyOfRange(rawData, pixyObjectStart, pixyObjectEnd));
-		    DriverStation.reportError("pixyObject created: " + pixyObject, false);
-
-			if(pixyObject.isValid() && pixyObject.signature == signature)
-				pixyObjectList.add(pixyObject);
-			i += 16;
-			
 		}
 		return pixyObjectList;
 	}
