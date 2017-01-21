@@ -14,6 +14,7 @@ public class Drivetrain extends Subsystem {
 	public CANTalon frontRight = new CANTalon(RobotMap.FRONT_RIGHT_PORT);
 	public CANTalon backLeft = new CANTalon(RobotMap.BACK_LEFT_PORT);
 	public CANTalon backRight = new CANTalon(RobotMap.BACK_RIGHT_PORT);
+	//public Encoder encoder = new Encoder(2,3);
 	
 	public void drive(double leftPower, double rightPower){
 		frontLeft.set(leftPower);
