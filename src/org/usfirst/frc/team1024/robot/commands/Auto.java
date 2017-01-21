@@ -7,7 +7,10 @@ import org.usfirst.frc.team1024.robot.Robot;
 import edu.wpi.first.wpilibj.command.Command;
 
 /**
- *
+ *@author Allen, Cameron, Mark, Lalit  1/21/2017
+ *Change Log
+ *1/21/2017
+ *	
  */
 public class Auto extends Command {
 	public int jobOne;
@@ -64,7 +67,7 @@ public class Auto extends Command {
 			switch (startingPosition) {
 			case 1: // Starting position 1
 				switch (type) { // only go to peg W or S
-				case "ShootWPeg": // Shoot, then go to West Peg
+				case "ShootWPegPositionOne": // Shoot, then go to West Peg
 					//start facing boiler
 					//if behind another robot at any point in time,
 						//wait for the other robot to move OR go around them
@@ -83,7 +86,7 @@ public class Auto extends Command {
 					//back up
 					//stop
 					break;
-				case "ShootSPeg": // Shoot, then go to South Peg
+				case "ShootSPegBluePositionOne": // Shoot, then go to South Peg
 					//start facing boiler
 					//if behind another robot at any point in time,
 						//wait for the other robot to move OR go around them
@@ -102,7 +105,7 @@ public class Auto extends Command {
 					//back up
 					//stop
 					break;
-				case "SPegShoot": // Go to South Peg, then Shoot
+				case "SPegShootBluePositionOne": // Go to South Peg, then Shoot
 					//start facing south peg
 					//if behind another robot at any point in time,
 						//wait for the other robot to move OR go around them
@@ -123,7 +126,7 @@ public class Auto extends Command {
 					//back up
 					//stop
 					break;
-				case "WPegShoot": // Go to West Peg, then Shoot
+				case "WPegShootPositionOne": // Go to West Peg, then Shoot
 					//start facing north
 					//if behind another robot at any point in time,
 						//wait for the other robot to move OR go around them
@@ -154,7 +157,7 @@ public class Auto extends Command {
 				break;
 			case 2: // Starting position 2
 				switch (type) {
-				case "ShootNPeg":
+				case "ShootNPegBluePositionTwo":
 					//start facing boiler
 					//if behind another robot at any point in time,
 						//wait for the other robot to move OR go around them
@@ -173,7 +176,7 @@ public class Auto extends Command {
 					//back up
 					//stop
 					break;
-				case "ShootSPeg":
+				case "ShootSPegBluePositionTwo":
 					//start facing boiler
 					//if behind another robot at any point in time,
 						//wait for the other robot to move OR go around them
@@ -192,7 +195,7 @@ public class Auto extends Command {
 					//back up
 					//stop
 					break;
-				case "ShootWPeg":
+				case "ShootWPegPositionTwo":
 					//start facing boiler
 					//if behind another robot at any point in time,
 						//wait for the other robot to move OR go around them

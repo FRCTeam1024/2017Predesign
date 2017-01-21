@@ -13,4 +13,5 @@ public class RobotMap {
 	public static final int BACK_RIGHT_PORT = 4;
 	
 	public static final int LOGITECH_PORT = 0;
+	public static final int GYRO_PORT = 0;
 }
