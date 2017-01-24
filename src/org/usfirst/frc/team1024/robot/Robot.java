@@ -4,6 +4,7 @@ import org.usfirst.frc.team1024.Pixy.*;
 
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -33,6 +34,8 @@ public class Robot extends IterativeRobot {
 	public static int averageX = 200;
 	Command autonomousCommand;
 	SendableChooser<Command> chooser = new SendableChooser<>();
+
+	int autoStep, autoMode;
 	
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -93,11 +96,10 @@ public class Robot extends IterativeRobot {
 //			autonomousCommand = new ExampleCommand();
 //			break; 
 //		}
-		 
 
-		// schedule the autonomous command (example)
-		if (autonomousCommand != null)
-			autonomousCommand.start();
+		autonomousCommand = new ExampleCommand();
+		
+		autoStep = 0;
 	}
 
 	/**
@@ -105,7 +107,31 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
+		
+		switch (autoStep){
+			case 0:	
+				if (!autonomousCommand.isRunning()){
+					autonomousCommand.start();
+				} else if (autonomousCommand.isRunning()){
+					autoStep = 1;
+				}
+				break;
+			case 1:
+
+				//Whatevs step 1 is ie drive straight
+				if (/*When step2Done = */true){
+					autoStep = 1;
+				}
+				break;
+			default:
+				break;
+		}
+		
 		Scheduler.getInstance().run();
+		drivetrain.drive(0.2, 0.2);
+		Timer.delay(5);
+		drivetrain.stop();
+	
 	}
 
 	@Override

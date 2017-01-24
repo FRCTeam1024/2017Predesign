@@ -1,3 +1,4 @@
+
 package org.usfirst.frc.team1024.robot.commands;
 
 import java.util.Scanner;
@@ -12,6 +13,7 @@ import edu.wpi.first.wpilibj.command.Command;
  *1/21/2017
  *	
  */
+*/*
 public class Auto extends Command {
 	public int jobOne;
 	public int jobTwoA;
@@ -877,7 +879,7 @@ public class Auto extends Command {
 			}
 			break;
 		}
-		*/
+		
 
 
 	@Override
@@ -893,3 +895,6 @@ public class Auto extends Command {
 	protected void interrupted() {
 	}
 }
+/*
+//Eight-hundred ninety-nine
+//nine-hundred lines of worthless, dispensable, expendable psuedocode

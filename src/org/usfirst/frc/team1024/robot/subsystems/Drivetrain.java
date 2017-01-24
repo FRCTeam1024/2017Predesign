@@ -32,6 +32,7 @@ public class Drivetrain extends Subsystem {
 		backLeft.set(0.0);
 		backRight.set(0.0);
 	}
+	
 	public void turnRight(double power, double desiredAngle) {
 		while(this.gyro.getAngle() >= desiredAngle) {
 			this.drive(power, -power);
@@ -44,7 +45,35 @@ public class Drivetrain extends Subsystem {
 		}
 		this.stop();
 	}
-	
+	public void rotateTo(double power, double desiredAngle) {
+		
+		double currentAngle = gyro.getAngle ();   // Get the current gyro angle. //
+
+		double A = Math.abs(desiredAngle - currentAngle);  // Take the absolute value of the expression //
+		// Value rotating clockwise //
+
+		double B = (360 - desiredAngle) + currentAngle;  // If using radians, use 2pi instead of 360 //
+		// Value rotating counterclockwise //
+
+		if (0 < desiredAngle && desiredAngle < 180) {  // If using radians, use 0 and pi //
+			if (A < B) {
+				this.drive(power, -power); // Rotate the robot clockwise //
+			} else if (A > B) {
+				this.drive(-power, power); // Rotate the robot counterclockwise //
+			} else {
+				this.drive(-power, power);  // If equal, just turn one direction //
+			}
+		} else if (180 < desiredAngle && desiredAngle < 360) {
+			if (A < B) {
+				this.drive(-power, power); // Rotate the robot counterclockwise //
+			} else if (A > B) {
+				this.drive(power, -power); // Rotate the robot clockwise //
+			} else {
+				this.drive(power, -power);   // If equal, just turn one direction //
+			}
+		}
+
+	}
 	public void driveForwardfullSpeed () {
 		this.drive(1.0, 1.0);
 	}

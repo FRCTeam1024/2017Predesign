@@ -26,6 +26,9 @@ public class ExampleCommand extends Command {
 	// Make this return true when this Command no longer needs to run execute()
 	@Override
 	protected boolean isFinished() {
+		//If at setpoint, return true
+		//If not at setpoint, return false
+		
 		return false;
 	}
 
