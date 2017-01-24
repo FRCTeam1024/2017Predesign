@@ -54,24 +54,30 @@ public class PixyI2C{
 		}
 		for (int i = 0; i <= BYTES_TO_READ - 13; i++) {
 			int firstWord = doubleByteToInt(rawData[i+1], rawData[i+0]); //Parse first 2 bytes
-			System.out.println("first word: " + firstWord + " at i = " + Integer.toString(i));
+			// System.out.println("first word: " + firstWord + " at i = " + Integer.toString(i));
 			if (firstWord == SYNCWORD) {
-				System.out.println("found SyncWord");
+				// System.out.println("found SyncWord");
 				int secondWord = doubleByteToInt(rawData[i+3], rawData[i+2]); //Parse next 2 bytes
 				int pixyObjectStart = i + 2;
 				int pixyObjectEnd = i + 14;
 				if (secondWord == SYNCWORD) {
-					System.out.println("found SyncWord #2");
+					// System.out.println("found SyncWord #2 at i = " + i);
 					pixyObjectStart += 2;
 					pixyObjectEnd += 2;
+					//something is wrong and the first stop word is not at position 0
+					if (i != 0) {
+						byte[] garbage = new byte[i];
+						pixy.readOnly(garbage, i);
+						// System.out.println("I just read " + i + "bytes and threw them away");
+					}
 				}
 				PixyObject pixyObject = new PixyObject(Arrays.copyOfRange(rawData, pixyObjectStart, pixyObjectEnd));
-			    System.out.println("pixyObject created: " + pixyObject);
+			    // System.out.println("pixyObject created: " + pixyObject);
 	
 				if(pixyObject.isValid() ) {
-					System.out.println("pixyObject is valid");
+					// System.out.println("pixyObject is valid");
 					if(pixyObject.signature == signature) {
-						System.out.println("pixyObject is the right signature");
+						// System.out.println("pixyObject is the right signature");
 						pixyObjectList.add(pixyObject);
 						i += 15; //was 16 changed because we get 1 more at the end of the loop
 					}

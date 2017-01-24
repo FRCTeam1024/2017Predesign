@@ -1,5 +1,6 @@
 
 package org.usfirst.frc.team1024.robot;
+import java.util.Iterator;
 import java.util.List;
 
 import org.usfirst.frc.team1024.Pixy.*;
@@ -35,6 +36,7 @@ public class Robot extends IterativeRobot {
 	public static int[] pixyValues;
 	public static int addedAverage;
 	public static int averageX = 200;
+	public static List<PixyObject> pixyObjectList;
 
 	Command autonomousCommand;
 	SendableChooser<Command> chooser = new SendableChooser<>();
@@ -128,10 +130,11 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
-		List<PixyObject> pixyObjectList = updatePixy();
+		pixyObjectList = updatePixy();
 		if (pixyObjectList != null) {
 			printPixyStuff(pixyObjectList);
-			System.out.println("Got " + pixyObjectList.size() + " objects from the pixy");
+			SmartDashboard.putNumber("2X", getAverageX(pixyObjectList));
+			//System.out.println("Got " + pixyObjectList.size() + " objects from the pixy");
 			//for (int i = 0; i < pixyObjectList.size(); i++) {
 			//	DriverStation.reportError(pixyObjectList.get(i).toString(), false);
 			//}
@@ -159,14 +162,24 @@ public class Robot extends IterativeRobot {
 			return null;
 		}
 	}
-	
-	public static void printPixyStuff(List<PixyObject> pol){
-		for(int i = 0; i < pol.size(); i++) {
-		PixyObject po1 = pol.get(i);
-		SmartDashboard.putNumber(String.format("Pixy %1$d X", i), po1.getX());
-		SmartDashboard.putNumber(String.format("Pixy %1$d Y", i), po1.getY());
-		SmartDashboard.putNumber(String.format("Pixy %1$d Width", i), po1.getWidth());
-		SmartDashboard.putNumber(String.format("Pixy %1$d Height", i), po1.getHeight());
+
+	public static void printPixyStuff(List<PixyObject> pol) {
+		for (int i = 0; i < pol.size(); i++) {
+			PixyObject po1 = pol.get(i);
+			SmartDashboard.putNumber(String.format("Pixy %1$d X", i), po1.getX());
+			SmartDashboard.putNumber(String.format("Pixy %1$d Y", i), po1.getY());
+			SmartDashboard.putNumber(String.format("Pixy %1$d Width", i), po1.getWidth());
+			SmartDashboard.putNumber(String.format("Pixy %1$d Height", i), po1.getHeight());
 		}
+		if (pol.size() == 2) {
+			int sum = pol.get(0).getX() + pol.get(1).getX();
+			SmartDashboard.putNumber("The Average of X", sum / 2);
+		}
+	}
+	public static int getAverageX(List<PixyObject> pol){
+		int ob1 = (int) SmartDashboard.getNumber("Pixy 0 X", 0);
+		int ob2 = (int) SmartDashboard.getNumber("Pixy 1 X", 0);
+		return (ob1 + ob2)/2;
+			
 	}
 }
