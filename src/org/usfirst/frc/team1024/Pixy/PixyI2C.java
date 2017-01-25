@@ -56,6 +56,7 @@ public class PixyI2C{
 					break;
 				}
 				packets[Sig - 1] = new PixyPacket();
+				PixyPacket.rawData = rawData;
 				PixyPacket.X = cvt(rawData[i+9], rawData[i+8]);
 				PixyPacket.Y = cvt(rawData[i+11], rawData[i+10]);
 				PixyPacket.Width = cvt(rawData[i+13], rawData[i+12]);

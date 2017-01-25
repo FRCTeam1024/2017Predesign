@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -30,7 +31,6 @@ public class Robot extends IterativeRobot {
 	public static int[] pixyValues;
 	public static int addedAverage;
 	public static int averageX = 200;
-
 	Command autonomousCommand;
 	SendableChooser<Command> chooser = new SendableChooser<>();
 	
@@ -51,6 +51,7 @@ public class Robot extends IterativeRobot {
 		pixyValues = new int[10];
 		drivetrain.frontRight.setInverted(true);
 		drivetrain.backRight.setInverted(true);
+		NetworkTable.globalDeleteAll();
 	}
 
 	/**
@@ -132,7 +133,6 @@ public class Robot extends IterativeRobot {
 			drivetrain.drive(-oi.logi.getRawAxis(1), -oi.logi.getRawAxis(3));
 		}
 		
-		
 		// 210 center
 		/*if (i < 100) {
 			if (pixy.getX() + 25 >= 190 && pixy.getX() + 25 <= 210) {
@@ -177,12 +177,13 @@ public class Robot extends IterativeRobot {
 		}
 	}
 	public static void printPixyStuff(){
-		SmartDashboard.putNumber("X", PixyPacket.X);
-		SmartDashboard.putNumber("Y", PixyPacket.Y);
+		SmartDashboard.putNumber("Pixy X", PixyPacket.X);
+		SmartDashboard.putNumber("Pixy Y", PixyPacket.Y);
 		SmartDashboard.putNumber("Width", PixyPacket.Width);
 		SmartDashboard.putNumber("Height", PixyPacket.Height);
 		SmartDashboard.putNumber("Area", pixy.getArea());
 		SmartDashboard.putNumber("AverageX", getAveragePixyX());
+		SmartDashboard.putString("Pixy rawData", new String(PixyPacket.rawData));
 	}
 	public static int firstAverage = 0;
 	public static int secondAverage = 0;

@@ -9,4 +9,6 @@ public class PixyPacket {
 	public static int Y;
 	public static int Width;
 	public static int Height;
+	
+	public static byte[] rawData;
 }
